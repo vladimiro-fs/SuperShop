@@ -55,22 +55,22 @@
         {
             if (ModelState.IsValid)
             {
-                _context.Add(product);
-                await _context.SaveChangesAsync();
+                _context.Add(product);                                                          // Saves the product in memory
+                await _context.SaveChangesAsync();                                             // Assynchronous saving
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);
+            return View(product);                                                             // The product fields remains filled 
         }
 
         // GET: Products/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)                                        // int? means an id might or might not exist
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _context.Products.FindAsync(id);
+            var product = await _context.Products.FindAsync(id);                             // Checking the table if the product exists
             if (product == null)
             {
                 return NotFound();
@@ -83,7 +83,7 @@
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Product product)
+        public async Task<IActionResult> Edit(int id, Product product)                       // Called when we do the post from Edit
         {
             if (id != product.Id)
             {
@@ -114,7 +114,7 @@
         }
 
         // GET: Products/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)                                     // Only shows what's to delete    
         {
             if (id == null)
             {
@@ -134,9 +134,10 @@
         // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)                            // Post is required to make sure that the action performed is to actually delete and not just
+                                                                                           // showing what's to delete
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _context.Products.FindAsync(id);                         // Check the table if the product is still there
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
