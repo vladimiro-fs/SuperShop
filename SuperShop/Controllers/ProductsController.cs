@@ -1,37 +1,36 @@
 ﻿namespace SuperShop.Controllers
 {
-    using System.Linq;
-    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using SuperShop.Data;
     using SuperShop.Data.Entities;
+    using System.Threading.Tasks;
 
     public class ProductsController : Controller
     {
-        private readonly DataContext _context;
+        private readonly IRepository _repository;
 
-        public ProductsController(DataContext context)
+        public ProductsController(IRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         // GET: Products
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Products.ToListAsync());
+            return View(_repository.GetProducts());
         }
 
         // GET: Products/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = _repository.GetProduct(id.Value);                             // id.Value gives the value of itself and assures that the program doesn't crash if id is null
+
             if (product == null)
             {
                 return NotFound();
@@ -55,22 +54,22 @@
         {
             if (ModelState.IsValid)
             {
-                _context.Add(product);                                                          // Saves the product in memory
-                await _context.SaveChangesAsync();                                             // Assynchronous saving
+                _repository.AddProduct(product);                                               // Saves the product in memory
+                await _repository.SaveAllAsync();                                             // Asynchronous saving
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);                                                             // The product fields remains filled 
+            return View(product);                                                          // The product fields remains filled 
         }
 
         // GET: Products/Edit/5
-        public async Task<IActionResult> Edit(int? id)                                        // int? means an id might or might not exist
+        public IActionResult Edit(int? id)                                                // int? means an id might or might not exist
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _context.Products.FindAsync(id);                             // Checking the table if the product exists
+            var product = _repository.GetProduct(id.Value);                             // Checking the table if the product exists
             if (product == null)
             {
                 return NotFound();
@@ -94,12 +93,12 @@
             {
                 try
                 {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
+                    _repository.UpdateProduct(product);
+                    await _repository.SaveAllAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(product.Id))
+                    if (_repository.ProductExists(product.Id))
                     {
                         return NotFound();
                     }
@@ -114,15 +113,14 @@
         }
 
         // GET: Products/Delete/5
-        public async Task<IActionResult> Delete(int? id)                                     // Only shows what's to delete    
+        public IActionResult Delete(int? id)                                                  // Only shows what's to delete    
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var product = _repository.GetProduct(id.Value);
             if (product == null)
             {
                 return NotFound();
@@ -135,17 +133,12 @@
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)                            // Post is required to make sure that the action performed is to actually delete and not just
-                                                                                           // showing what's to delete
+                                                                                            // showing what's to delete
         {
-            var product = await _context.Products.FindAsync(id);                         // Check the table if the product is still there
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+            var product = _repository.GetProduct(id);                                     // Check the table if the product is still there
+            _repository.RemoveProduct(product);
+            await _repository.SaveAllAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool ProductExists(int id)
-        {
-            return _context.Products.Any(e => e.Id == id);
         }
     }
 }

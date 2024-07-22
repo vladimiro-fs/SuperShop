@@ -1,12 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations.Operations;
-using SuperShop.Controllers;
-using SuperShop.Data.Entities;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace SuperShop.Data
+﻿namespace SuperShop.Data
 {
+    using SuperShop.Data.Entities;
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+
     public class SeedDb
     {
         private readonly DataContext _context;
