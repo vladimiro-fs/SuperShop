@@ -26,7 +26,7 @@ namespace SuperShop
             });
 
             services.AddTransient<SeedDb>();                                             // Creates an object, and when it's deleted, it can't be created again  
-            services.AddScoped<IRepository, Repository>();                               // Creates an object that, when used, it's removed, and a new object like the deleted one is created 
+            services.AddScoped<IProductRepository, ProductRepository>();                // Creates an object that, when used, it's removed, and a new object like the deleted one is created 
 
             services.AddControllersWithViews();
         }

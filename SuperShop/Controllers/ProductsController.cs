@@ -8,28 +8,28 @@
 
     public class ProductsController : Controller
     {
-        private readonly IRepository _repository;
+        private readonly IProductRepository _productRepository;
 
-        public ProductsController(IRepository repository)
+        public ProductsController(IProductRepository productRepository)
         {
-            _repository = repository;
+            _productRepository = productRepository;
         }
 
         // GET: Products
         public IActionResult Index()
         {
-            return View(_repository.GetProducts());
+            return View(_productRepository.GetAll());
         }
 
         // GET: Products/Details/5
-        public IActionResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = _repository.GetProduct(id.Value);                             // id.Value gives the value of itself and assures that the program doesn't crash if id is null
+            var product = await _productRepository.GetByIdAsync(id.Value);                       // id.Value gives the value of itself and assures that the program doesn't crash if id is null
 
             if (product == null)
             {
@@ -54,22 +54,22 @@
         {
             if (ModelState.IsValid)
             {
-                _repository.AddProduct(product);                                               // Saves the product in memory
-                await _repository.SaveAllAsync();                                             // Asynchronous saving
+                await _productRepository.CreateAsync(product);                                               
+                                                           
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);                                                          // The product fields remains filled 
+            return View(product);                                                                     // The product fields remains filled 
         }
 
         // GET: Products/Edit/5
-        public IActionResult Edit(int? id)                                                // int? means an id might or might not exist
+        public async Task<IActionResult> Edit(int? id)                                                // int? means an id might or might not exist
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = _repository.GetProduct(id.Value);                             // Checking the table if the product exists
+            var product = await _productRepository.GetByIdAsync(id.Value);                             // Checking the table if the product exists
             if (product == null)
             {
                 return NotFound();
@@ -82,7 +82,7 @@
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Product product)                       // Called when we do the post from Edit
+        public async Task<IActionResult> Edit(int id, Product product)                                  // Called when we do the post from Edit
         {
             if (id != product.Id)
             {
@@ -93,12 +93,12 @@
             {
                 try
                 {
-                    _repository.UpdateProduct(product);
-                    await _repository.SaveAllAsync();
+                    await _productRepository.UpdateAsync(product);
+                    
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (_repository.ProductExists(product.Id))
+                    if (! await _productRepository.ExistAsync(product.Id))
                     {
                         return NotFound();
                     }
@@ -113,14 +113,14 @@
         }
 
         // GET: Products/Delete/5
-        public IActionResult Delete(int? id)                                                  // Only shows what's to delete    
+        public async Task<IActionResult> Delete(int? id)                                              // Only shows what's to delete    
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = _repository.GetProduct(id.Value);
+            var product = await _productRepository.GetByIdAsync(id.Value);
             if (product == null)
             {
                 return NotFound();
@@ -135,9 +135,9 @@
         public async Task<IActionResult> DeleteConfirmed(int id)                            // Post is required to make sure that the action performed is to actually delete and not just
                                                                                             // showing what's to delete
         {
-            var product = _repository.GetProduct(id);                                     // Check the table if the product is still there
-            _repository.RemoveProduct(product);
-            await _repository.SaveAllAsync();
+            var product = await _productRepository.GetByIdAsync(id);                        // Check the table if the product is still there
+            await _productRepository.DeleteAsync(product);
+           
             return RedirectToAction(nameof(Index));
         }
     }
