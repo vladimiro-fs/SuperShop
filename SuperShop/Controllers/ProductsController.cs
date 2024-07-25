@@ -4,21 +4,25 @@
     using Microsoft.EntityFrameworkCore;
     using SuperShop.Data;
     using SuperShop.Data.Entities;
+    using SuperShop.Helpers;
+    using System.Linq;
     using System.Threading.Tasks;
 
     public class ProductsController : Controller
     {
         private readonly IProductRepository _productRepository;
+        private readonly IUserHelper _userHelper;
 
-        public ProductsController(IProductRepository productRepository)
+        public ProductsController(IProductRepository productRepository, IUserHelper userHelper)
         {
             _productRepository = productRepository;
+            _userHelper = userHelper;
         }
 
         // GET: Products
         public IActionResult Index()
         {
-            return View(_productRepository.GetAll());
+            return View(_productRepository.GetAll().OrderBy(p => p.Name));
         }
 
         // GET: Products/Details/5
@@ -54,8 +58,9 @@
         {
             if (ModelState.IsValid)
             {
-                await _productRepository.CreateAsync(product);                                               
-                                                           
+                //TODO: Change to the user that is logged in
+                product.User = await _userHelper.GetUserByEmailAsync("rafaasfs@gmail.com");
+                await _productRepository.CreateAsync(product);                                                                                                         
                 return RedirectToAction(nameof(Index));
             }
             return View(product);                                                                     // The product fields remains filled 
@@ -93,6 +98,8 @@
             {
                 try
                 {
+                    //TODO: change to the user that is logged in
+                    product.User = await _userHelper.GetUserByEmailAsync("rafaasfs@gmail.com");
                     await _productRepository.UpdateAsync(product);
                     
                 }
