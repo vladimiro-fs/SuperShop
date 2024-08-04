@@ -19,7 +19,7 @@ namespace SuperShop.Controllers.API
         public IActionResult GetProducts() 
         { 
             // All products are gathered on a JSON file
-            return Ok(_productRepository.GetAll());
+            return Ok(_productRepository.GetAllWithUsers());
         }
 
     }
