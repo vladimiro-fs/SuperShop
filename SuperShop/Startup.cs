@@ -41,8 +41,10 @@ namespace SuperShop
                 cfg.UseSqlServer(this.Configuration.GetConnectionString("DefaultConnection"));
             });
 
-            services.AddTransient<SeedDb>();                                             // Creates an object, and when it's deleted, it can't be created again  
+            services.AddTransient<SeedDb>();                                             // Creates an object, and when it's deleted, it can't be created again
             services.AddScoped<IUserHelper, UserHelper>();
+            services.AddScoped<IImageHelper, ImageHelper>();
+            services.AddScoped<IConverterHelper, ConverterHelper>();
 
             services.AddScoped<IProductRepository, ProductRepository>();                // Creates an object that, when used, it's removed, and a new object like the deleted one is created 
 
